@@ -34,18 +34,18 @@ def getDistanceMatrix(macLonlat):
     for i in range(length):
         mac = macList[i]
         v1 = macLonlat[mac]
-        distanceList = []
+        distanceDict = {}
         for j in range(length):
-            v2 = macLonlat[macList[j]]
-            distanceList.append(euclideanDistance(v1, v2))
-        macDistance[mac] = distanceList
-
+            mac2 = macList[j]
+            v2 = macLonlat[mac2]
+            distanceDict[mac2] = euclideanDistance(v1, v2)
+        macDistance[mac] = distanceDict
     return macDistance
 
 
 def getUtilizationMatrix():
 
-    fr = open("apnum0316",'r')
+    fr = open("0316",'r')
     macUtilization = {}
 
     for data in fr.readlines():
@@ -64,14 +64,22 @@ def getUtilizationMatrix():
     for i in range(length):
         mac = macList[i]
         v1 = macUtilization[mac]
-        distanceList = []
+        distanceDict = {}
         for j in range(length):
-            v2 = macUtilization[macList[j]]
-            distanceList.append(cos(v1, v2)) #这里用余弦相似度
-        macDistance[mac] = distanceList
+            mac2 = macList[j]
+            v2 = macUtilization[mac2]
+            distanceDict[mac2] = cos(v1, v2) # 这里用余弦相似度
+        macDistance[mac] = distanceDict
     return macDistance
 
 
+
+#得到在一定距离范围内的ap
+#def nearestDistance(macDistance):
+#    for k,v in macDistance:
+#        mac = k
+#        distanceList = v
+#        for i in
 
 
 if __name__=="__main__":
@@ -110,9 +118,12 @@ if __name__=="__main__":
     macDistance = getDistanceMatrix(macLonlat)   # 需要改进：只需要计算未知poi与所有poi之间的距离，减少计算量；??????????????????????????????
 
     fw = open(cmdArgv[3], 'w') #buptpoi16_22_intCatagory_distanceMatrix
-    for mac in macDistance.keys():
+    macList = macDistance.keys()
+
+    for mac in macList:
         fw.write(mac)
-        for d in macDistance[mac]:
+        for mac2 in macList:
+            d = macDistance[mac][mac2]
             fw.write(','+str(d))
         fw.write(','+str(macCtgyPredict[mac])+','+str(macCtgyTrue[mac])+'\n')  #输出格式：mac,[macDistance],用于预测的mac类别值，真实的mac类别值
     fw.close()
@@ -120,9 +131,12 @@ if __name__=="__main__":
     macCosine = getUtilizationMatrix()
 
     fw2 = open("buptpoi16_cosineMatrix", 'w') #buptpoi16_cosineMatrix
-    for mac in macDistance.keys():
+    macList2 = macCosine.keys()
+
+    for mac in macList2:
         fw2.write(mac)
-        for d in macDistance[mac]:
+        for mac2 in macList2:
+            d = macCosine[mac][mac2]
             fw2.write(','+str(d))
-        fw2.write(','+str(macCtgyPredict[mac])+','+str(macCtgyTrue[mac])+'\n')  #输出格式：mac,[macCosine],用于预测的mac类别值，真实的mac类别值
+        fw2.write(','+str(macCtgyPredict[mac])+','+str(macCtgyTrue[mac])+'\n')  #输出格式：mac,[macDistance],用于预测的mac类别值，真实的mac类别值
     fw2.close()
