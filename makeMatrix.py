@@ -5,6 +5,10 @@ cmdArgv = sys.argv
 
 from numpy import *
 
+minDistance = 0.0014 #ap间的距离在这个范围内时，列为邻居
+ctgyNum = 16 #其中未知ap的类别为0
+kValue = 10 #取前k个最相似的ap
+
 #欧几里得距离：值越小表示距离越近
 def euclideanDistance(vector1,vector2):
     d = (float(vector1[0])-float(vector2[0]))**2 + (float(vector1[1])-float(vector2[1]))**2
@@ -43,19 +47,7 @@ def getDistanceMatrix(macLonlat):
     return macDistance
 
 
-def getUtilizationMatrix():
-
-    fr = open("0316",'r')
-    macUtilization = {}
-
-    for data in fr.readlines():
-        data = data.strip('\n')
-        data = data.split(',')
-        mac = data[0]
-        utilizationList = []
-        for i in range(1,len(data)):
-            utilizationList.append(data[i])
-        macUtilization[mac] = utilizationList
+def getUtilizationMatrix(macUtilization):
 
     macDistance ={} #存储每个ap之间的余弦相似度
     macList = macUtilization.keys() #表示dict中所有的mac，按顺序存储
@@ -74,12 +66,55 @@ def getUtilizationMatrix():
 
 
 
-#得到在一定距离范围内的ap
-#def nearestDistance(macDistance):
-#    for k,v in macDistance:
-#        mac = k
-#        distanceList = v
-#        for i in
+#得到在一定距离范围内的ap，返回每个ap的邻域内的类别分布
+def nearestDistance(macDistance,macCtgyPredict):
+    macCtgyDistribution = {}
+    for k,v in macDistance.items():
+        mac = k
+        distanceDict = v
+        nearestMac = []
+        for mac2,d in distanceDict.items():
+            if d < minDistance:
+                nearestMac.append(mac2)
+        ctgy = [0]*ctgyNum
+        for m in nearestMac:
+            catagory = int(macCtgyPredict[m])
+#            catagory = int(macCtgyTrue[m])
+
+            if catagory > 0: #注意！！！！！！！！！！！！！！！！！！！这里要舍去类别为0的ap，不然会以为0也是一个类别
+                ctgy[catagory-1] += 1
+        for i in range(len(ctgy)):
+            ctgy[i] = float(ctgy[i])/len(nearestMac) #求每种类别在该mac的邻域内所占的比例
+        macCtgyDistribution[mac] = ctgy
+    return macCtgyDistribution
+
+#输入一个ap矩阵（可能是类别分布矩阵，也可能是使用模式矩阵），返回与该ap最相似的前k个ap的类别占比
+def getDistribution(macCtgyDistribution, macCtgyPredict):
+
+    distribution = {}
+    for m1 in macCtgyPredict:
+        macCosineList = []
+        v1 = macCtgyDistribution[m1]
+        for m2 in macCtgyPredict:
+            v2 = macCtgyDistribution[m2]
+            macCosineList.append((m2,cos(v1,v2)))
+        macCosineList.sort(key=lambda x:x[1])
+
+        ctgy = [0]*ctgyNum
+        for i in range(kValue): #取前10个余弦值最大的ap
+            mac = macCosineList[i][0]
+            catagory = int(macCtgyPredict[mac])
+#            catagory = int(macCtgyTrue[mac])
+
+            if catagory > 0:# 注意！！！！！！！！！！！！！！！！！！！这里要舍去类别为0的ap，不然会以为0也是一个类别
+                ctgy[catagory-1] += 1
+        for i in range(len(ctgy)):
+            ctgy[i] = float(ctgy[i])/kValue #求前k=10个ap的类别所占的比例
+        distribution[m1] = ctgy
+    return distribution
+
+
+
 
 
 if __name__=="__main__":
@@ -117,26 +152,61 @@ if __name__=="__main__":
 
     macDistance = getDistanceMatrix(macLonlat)   # 需要改进：只需要计算未知poi与所有poi之间的距离，减少计算量；??????????????????????????????
 
-    fw = open(cmdArgv[3], 'w') #buptpoi16_22_intCatagory_distanceMatrix
-    macList = macDistance.keys()
+    macCtgyDistribution = nearestDistance(macDistance, macCtgyPredict)
+    distribution1 = getDistribution(macCtgyDistribution, macCtgyPredict)
 
-    for mac in macList:
-        fw.write(mac)
-        for mac2 in macList:
-            d = macDistance[mac][mac2]
-            fw.write(','+str(d))
-        fw.write(','+str(macCtgyPredict[mac])+','+str(macCtgyTrue[mac])+'\n')  #输出格式：mac,[macDistance],用于预测的mac类别值，真实的mac类别值
-    fw.close()
+#    fw = open(cmdArgv[3], 'w') #buptpoi16_22_intCatagory_distanceMatrix
+#    macList = macDistance.keys()
 
-    macCosine = getUtilizationMatrix()
+#    for mac in macList:
+#        fw.write(mac)
+#        for mac2 in macList:
+#            d = macDistance[mac][mac2]
+#            fw.write(','+str(d))
+#        fw.write(','+str(macCtgyPredict[mac])+','+str(macCtgyTrue[mac])+'\n')  #输出格式：mac,[macDistance],用于预测的mac类别值，真实的mac类别值
+#    fw.close()
 
-    fw2 = open("buptpoi16_cosineMatrix", 'w') #buptpoi16_cosineMatrix
-    macList2 = macCosine.keys()
 
-    for mac in macList2:
-        fw2.write(mac)
-        for mac2 in macList2:
-            d = macCosine[mac][mac2]
-            fw2.write(','+str(d))
-        fw2.write(','+str(macCtgyPredict[mac])+','+str(macCtgyTrue[mac])+'\n')  #输出格式：mac,[macDistance],用于预测的mac类别值，真实的mac类别值
-    fw2.close()
+    fr = open("0323",'r')
+    macUtilization = {}
+
+    for data in fr.readlines():
+        data = data.strip('\n')
+        data = data.split(',')
+        mac = data[0]
+        utilizationList = []
+        for i in range(1,len(data)):
+            utilizationList.append(data[i])
+        macUtilization[mac] = utilizationList
+    fr.close()
+
+    distribution2 = getDistribution(macUtilization, macCtgyPredict)
+
+    theta1 = 0.1
+    theta2 = 0.9
+    predictCtgy = {} #存储最终预测的每个ap的类别
+    for m,v1 in distribution1.items():
+        v2 = distribution2[m]
+        v = [0]*ctgyNum
+        for i in range(len(v)):
+            v[i] = theta1*v1[i] + theta2*v2[i]
+        c = v.index(max(v)) + 1 #所属的类别＝ 概率最大的那个值的下标
+        predictCtgy[m] = c
+
+    fw1 = open('buptpoi23_predictCtgy','w')
+    for m,c in predictCtgy.items():
+        fw1.write(m +',' +str(c)+','+str(macCtgyPredict[m])+','+str(macCtgyTrue[m]) +'\n') #输出格式： mac, 预测的类别，用于预测的mac类别值，真实的mac类别值
+    fw1.close()
+
+#    macCosine = getUtilizationMatrix(macUtilization)
+
+#    fw2 = open("buptpoi16_cosineMatrix", 'w') #buptpoi16_cosineMatrix
+#    macList2 = macCosine.keys()
+
+#    for mac in macList2:
+#        fw2.write(mac)
+#        for mac2 in macList2:
+#            d = macCosine[mac][mac2]
+#            fw2.write(','+str(d))
+#        fw2.write(','+str(macCtgyPredict[mac])+','+str(macCtgyTrue[mac])+'\n')  #输出格式：mac,[macDistance],用于预测的mac类别值，真实的mac类别值
+#    fw2.close()
