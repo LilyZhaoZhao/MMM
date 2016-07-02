@@ -167,7 +167,7 @@ if __name__=="__main__":
 #    fw.close()
 
 
-    fr = open("0323",'r')
+    fr = open(cmdArgv[3],'r') # 0316
     macUtilization = {}
 
     for data in fr.readlines():
@@ -182,8 +182,8 @@ if __name__=="__main__":
 
     distribution2 = getDistribution(macUtilization, macCtgyPredict)
 
-    theta1 = 0.1
-    theta2 = 0.9
+    theta1 = 0.4
+    theta2 = 0.6
     predictCtgy = {} #存储最终预测的每个ap的类别
     for m,v1 in distribution1.items():
         v2 = distribution2[m]
@@ -193,7 +193,7 @@ if __name__=="__main__":
         c = v.index(max(v)) + 1 #所属的类别＝ 概率最大的那个值的下标
         predictCtgy[m] = c
 
-    fw1 = open('buptpoi23_predictCtgy','w')
+    fw1 = open(cmdArgv[4],'w') # buptpoi23_predictCtgy
     for m,c in predictCtgy.items():
         fw1.write(m +',' +str(c)+','+str(macCtgyPredict[m])+','+str(macCtgyTrue[m]) +'\n') #输出格式： mac, 预测的类别，用于预测的mac类别值，真实的mac类别值
     fw1.close()
