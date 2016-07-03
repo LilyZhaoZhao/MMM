@@ -52,8 +52,11 @@ samplingRatio = 0.3 #采样比例，即留出30%作为测试集
 for item in res:
     numOfApInItem = len(res[item])
     if(numOfApInItem > 0): #如果该格子内有ap，则按比例采样
-        numOfSampling = int(samplingRatio * numOfApInItem)+1
+#        numOfSampling = int(samplingRatio * numOfApInItem)+1
+        numOfSampling = int(samplingRatio * numOfApInItem)
+
         poi = res[item]
+        #print numOfSampling, numOfApInItem
         for i in range(numOfSampling):
             print >> output1, poi[i].strip('\n')+'|'+str(id[item])
         for j in range(numOfSampling, numOfApInItem):

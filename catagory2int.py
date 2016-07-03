@@ -42,6 +42,6 @@ def sortByLonLat(s1,s2):
 
 if __name__=="__main__":
 
-    catagory2int(cmdArgv[1])
+    #catagory2int(cmdArgv[1])
 
-    #sortByLonLat(cmdArgv[1],cmdArgv[2])
+    sortByLonLat(cmdArgv[1],cmdArgv[2])
