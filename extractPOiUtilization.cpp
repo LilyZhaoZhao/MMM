@@ -184,8 +184,9 @@ int main(int argc, char* argv[]){
     string s1,s2,s3,s4;
         s1 = argv[1];// TecentData/wifi_conn/20150316/safe_wifi_connect_sample_export
         s2 = argv[2];// szPoi
-        s3 = argv[3];// szUtilization_0316
-        s4 = argv[4];// szPoi_0316
+        //s3 = argv[3];// szUtilization_0316
+        s3 = s2+"_Utilization_0316";
+        s4 = s2+"_0316";// szPoi_0316
         fact(s1,s2,s3,s4);
    // }
 

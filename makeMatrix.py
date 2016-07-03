@@ -5,9 +5,9 @@ cmdArgv = sys.argv
 
 from numpy import *
 
-minDistance = 0.0014 #ap间的距离在这个范围内时，列为邻居
+minDistance = 0.14 #ap间的距离在这个范围内时，列为邻居
 ctgyNum = 16 #其中未知ap的类别为0
-kValue = 10 #取前k个最相似的ap
+kValue = 50 #取前k个最相似的ap
 
 #欧几里得距离：值越小表示距离越近
 def euclideanDistance(vector1,vector2):
@@ -78,8 +78,8 @@ def nearestDistance(macDistance,macCtgyPredict):
                 nearestMac.append(mac2)
         ctgy = [0]*ctgyNum
         for m in nearestMac:
-            catagory = int(macCtgyPredict[m])
-#            catagory = int(macCtgyTrue[m])
+#            catagory = int(macCtgyPredict[m])
+            catagory = int(macCtgyTrue[m])
 
             if catagory > 0: #注意！！！！！！！！！！！！！！！！！！！这里要舍去类别为0的ap，不然会以为0也是一个类别
                 ctgy[catagory-1] += 1
@@ -103,8 +103,8 @@ def getDistribution(macCtgyDistribution, macCtgyPredict):
         ctgy = [0]*ctgyNum
         for i in range(kValue): #取前10个余弦值最大的ap
             mac = macCosineList[i][0]
-            catagory = int(macCtgyPredict[mac])
-#            catagory = int(macCtgyTrue[mac])
+#            catagory = int(macCtgyPredict[mac])
+            catagory = int(macCtgyTrue[mac])
 
             if catagory > 0:# 注意！！！！！！！！！！！！！！！！！！！这里要舍去类别为0的ap，不然会以为0也是一个类别
                 ctgy[catagory-1] += 1
@@ -118,8 +118,11 @@ def getDistribution(macCtgyDistribution, macCtgyPredict):
 
 
 if __name__=="__main__":
-    fr1 = open(cmdArgv[1],'r')#buptpoi16_22_intCatagory_block_trainset
-    fr2 = open(cmdArgv[2],'r')#buptpoi16_22_intCatagory_block_testset
+
+    # cmdArgv[1] = szPoi
+    s1 = cmdArgv[1]
+    fr1 = open(s1+'_0316_intCatagory_block_trainset','r')#buptpoi16_22_intCatagory_block_trainset
+    fr2 = open(s1+'_0316_intCatagory_block_testset','r')#buptpoi16_22_intCatagory_block_testset
 
     macLonlat = {}
     macCtgyTrue = {}
@@ -167,7 +170,7 @@ if __name__=="__main__":
 #    fw.close()
 
 
-    fr = open(cmdArgv[3],'r') # 0316
+    fr = open(s1+'_Utilization_0316','r') # 0316
     macUtilization = {}
 
     for data in fr.readlines():
@@ -193,7 +196,7 @@ if __name__=="__main__":
         c = v.index(max(v)) + 1 #所属的类别＝ 概率最大的那个值的下标
         predictCtgy[m] = c
 
-    fw1 = open(cmdArgv[4],'w') # buptpoi23_predictCtgy
+    fw1 = open(s1+'_predictCtgy_0316','w') # buptpoi23_predictCtgy or szPoi_predictCtgy_0316
     for m,c in predictCtgy.items():
         fw1.write(m +',' +str(c)+','+str(macCtgyPredict[m])+','+str(macCtgyTrue[m]) +'\n') #输出格式： mac, 预测的类别，用于预测的mac类别值，真实的mac类别值
     fw1.close()

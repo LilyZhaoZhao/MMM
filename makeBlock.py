@@ -8,7 +8,7 @@ cmdArgv = sys.argv
 #          然后在每个格子中按照比例选取一定数量的ap，作为测试集；其余的用作训练集；
 #          最后输出的文件格式：poi原始数据|catagory编号|block编号
 
-datas = open(sys.argv[1],'r').readlines() #buptpoi16_22_intCatagory
+datas = open(sys.argv[1],'r').readlines() #buptpoi16_22_intCatagory or szPoi_0316_intCatagory
 output1 = open(sys.argv[1]+'_block_testset', 'w') #输出的poi作为未知类别的ap，用于验证
 output2 = open(sys.argv[1]+'_block_trainset', 'w') #输出的poi作为已知类别的ap
 
