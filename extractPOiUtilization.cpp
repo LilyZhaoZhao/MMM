@@ -186,8 +186,8 @@ int main(int argc, char* argv[]){
         s = argv[2];// szPoi
         s2 = "szPoiSplit/"+s;   //注意这里不能在szPoiSplit前面加 / ，切记！！！！！！！！
         //s3 = argv[3];// szUtilization_0316
-        s3 = s+"_Utilization_0316";
-        s4 = s+"_0316";// szPoi_0316
+        s3 = s+"_Utilization_0321";
+        s4 = s+"_0321";// szPoi_0316
         fact(s1,s2,s3,s4);
    // }
 

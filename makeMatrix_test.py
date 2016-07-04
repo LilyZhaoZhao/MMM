@@ -7,7 +7,7 @@ cmdArgv = sys.argv
 
 minDistance = 0.044 #ap间的距离在这个范围内(经纬度都相差0.001)时，列为邻居
 ctgyNum = 16 #其中未知ap的类别为0
-kValue = 1 #取前k个最相似的ap，k值取单数，因为是多数投票
+kValue = 3 #取前k个最相似的ap，k值取单数，因为是多数投票
 
 #欧几里得距离：值越小表示距离越近
 def euclideanDistance(vector1,vector2):
@@ -105,8 +105,8 @@ if __name__=="__main__":
 
     # cmdArgv[1] = szPoi
     s1 = cmdArgv[1]
-    fr1 = open(s1+'_0316_intCatagory_block_trainset','r')#buptpoi16_22_intCatagory_block_trainset
-    fr2 = open(s1+'_0316_intCatagory_block_testset','r')#buptpoi16_22_intCatagory_block_testset
+    fr1 = open(s1+'_0321_intCatagory_block_trainset','r')#buptpoi16_22_intCatagory_block_trainset
+    fr2 = open(s1+'_0321_intCatagory_block_testset','r')#buptpoi16_22_intCatagory_block_testset
 
     macLonlat = {}
     macCtgyTrue = {}
@@ -146,7 +146,7 @@ if __name__=="__main__":
     distribution1 = getDistribution(macCtgyDistribution1)
 
 
-    fr = open(s1+'_Utilization_0316','r') # 0316
+    fr = open(s1+'_Utilization_0321','r') # 0316
     macUtilization = {}
 
     for data in fr.readlines():
@@ -180,7 +180,7 @@ if __name__=="__main__":
 #    for m,c in predictCtgy.items():
 #        print m, c, macCtgyTest[m], macCtgyTrue[m]
 
-    fw1 = open(s1+'_0316_predictCtgy','w') # buptpoi23_predictCtgy or szPoi_0316_predictCtgy
+    fw1 = open(s1+'_0321_predictCtgy','w') # buptpoi23_predictCtgy or szPoi_0316_predictCtgy
     for m,c in predictCtgy.items():
         fw1.write(m +',' +str(c)+','+str(macCtgyTest[m])+','+str(macCtgyTrue[m]) +'\n') #输出格式： mac, 预测的类别，用于预测的mac类别值，真实的mac类别值
     fw1.close()
