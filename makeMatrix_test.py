@@ -7,7 +7,7 @@ cmdArgv = sys.argv
 
 minDistance = 0.044 #ap间的距离在这个范围内(经纬度都相差0.001)时，列为邻居
 ctgyNum = 16 #其中未知ap的类别为0
-kValue = 9 #取前k个最相似的ap，k值取单数，因为是多数投票
+kValue = 1 #取前k个最相似的ap，k值取单数，因为是多数投票
 
 #欧几里得距离：值越小表示距离越近
 def euclideanDistance(vector1,vector2):
@@ -85,7 +85,7 @@ def getDistribution(macCtgyDistribution):
         macCosineList.sort(reverse=True, key=lambda x:x[1])  # 逆序排列！！！！！
 
         ctgy = [0]*ctgyNum
-        for i in range(kValue): #取前10个余弦值最大的ap
+        for i in range(kValue): #取前k个余弦值最大的ap
             mac = macCosineList[i][0]
             catagory = int(macCtgyTest[mac])
 #            catagory = int(macCtgyTrue[mac])
