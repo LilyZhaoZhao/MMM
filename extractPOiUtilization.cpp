@@ -181,13 +181,13 @@ void fact(string whichDay,string poi, string apNumFile, string dayPoi){
 
 int main(int argc, char* argv[]){
 
-    string s1,s2,s3,s4,s;
-        s1 = argv[1];// TecentData/wifi_conn/20150316/safe_wifi_connect_sample_export
-        s = argv[2];// szPoi
-        s2 = "szPoiSplit/"+s;   //注意这里不能在szPoiSplit前面加 / ，切记！！！！！！！！
-        //s3 = argv[3];// szUtilization_0316
-        s3 = s+"_Utilization_0321";
-        s4 = s+"_0321";// szPoi_0316
+        string s1,s2,s3,s4,a,b;
+        a = argv[1];  // szPoiba
+        b = argv[2]; // 0316
+        s1 = "../TecentData/wifi_conn/2015"+b+"/safe_wifi_connect_sample_export"; // ../TecentData/wifi_conn/20150316/safe_wifi_connect_sample_export
+        s2 = "szPoiSplit/"+a;   //注意这里不能在szPoiSplit前面加 / ，切记！！！！！！！！
+        s3 = a+"_"+b+"_Utilization";
+        s4 = a+"_"+b;// szPoi_0316
         fact(s1,s2,s3,s4);
    // }
 

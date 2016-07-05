@@ -62,15 +62,21 @@ def nearestDistance(macDistance):
             if d < minDistance:
                 nearestMac.append(mac2)
         ctgy = [0]*ctgyNum
+        numOfKnownAp = 0 #统计邻域内已知类型的ap个数
         for m in nearestMac:
             catagory = int(macCtgyTest[m])
 #            catagory = int(macCtgyTrue[m]) #????????????????没有传入这个变量啊？？？
 
             if catagory > 0: #注意！！！！！！！！！！！！！！！！！！！这里要舍去类别为0的ap，不然会以为0也是一个类别
                 ctgy[catagory-1] += 1
+                numOfKnownAp += 1
         for i in range(len(ctgy)):
             ctgy[i] = float(ctgy[i])/len(nearestMac) #求每种类别在该mac的邻域内所占的比例
-        macCtgyDistribution[mac] = ctgy
+#        macCtgyDistribution[mac] = ctgy
+
+#在新的macCtgyDistribution中加入了邻域内ap的个数，用于计算ap density；
+#则macCtgyDistribution的结构为： dict[ap]=([类别分布向量],#邻域内所有的ap,#已知类型的ap)
+        macCtgyDistribution[mac] = (ctgy, len(nearestMac), numOfKnownAp)
     return macCtgyDistribution
 
 #输入一个ap矩阵（可能是类别分布矩阵，也可能是使用模式矩阵），返回与该ap最相似的前k个ap的类别占比
@@ -103,10 +109,10 @@ def getDistribution(macCtgyDistribution):
 
 if __name__=="__main__":
 
-    # cmdArgv[1] = szPoi
+    # cmdArgv[1] = szPoiba_0316
     s1 = cmdArgv[1]
-    fr1 = open(s1+'_0321_intCatagory_block_trainset','r')#buptpoi16_22_intCatagory_block_trainset
-    fr2 = open(s1+'_0321_intCatagory_block_testset','r')#buptpoi16_22_intCatagory_block_testset
+    fr1 = open(s1+'_intCatagory_block_trainset','r')#buptpoi16_22_intCatagory_block_trainset
+    fr2 = open(s1+'_intCatagory_block_testset','r')#buptpoi16_22_intCatagory_block_testset
 
     macLonlat = {}
     macCtgyTrue = {}
@@ -143,10 +149,18 @@ if __name__=="__main__":
 
     macCtgyDistribution1 = nearestDistance(macDistance1)
 
-    distribution1 = getDistribution(macCtgyDistribution1)
+    macCtgyDistribution1_new = {} #存储每个ap对应的邻域的类型占比分布
+    numOfApNeighbor = {} #存储每个ap的邻域数目
+    numOfApNeighborKnown = {} #存储每个ap的邻域中已知类型的ap数目
+    for m,v in macCtgyDistribution1.items():
+        numOfApNeighbor[m] = v[1]
+        numOfApNeighborKnown[m] = v[2]
+        macCtgyDistribution1_new[m] = v[0]
+
+#    distribution1 = getDistribution(macCtgyDistribution1)
 
 
-    fr = open(s1+'_Utilization_0321','r') # 0316
+    fr = open(s1+'_Utilization','r') # szPoiba_0316_Utilization
     macUtilization = {}
 
     for data in fr.readlines():
@@ -159,28 +173,32 @@ if __name__=="__main__":
         macUtilization[mac] = utilizationList
     fr.close()
 
-    distribution2 = getDistribution(macUtilization)
+#    distribution2 = getDistribution(macUtilization)
 
+    macPattern = {}# 连接邻域模式和使用模式的向量，即连接了macCtgyDistribution1_new ＋ macUtilization
+    for m,v in macCtgyDistribution1_new.items():
+        macPattern[m] = v+macUtilization[m]
 
+    distribution_new = getDistribution(macPattern) #所以只需要求一个综合分布即可
 
-    theta1 = 0.4
-    theta2 = 0.6
+#    theta1 = 0.4
+#    theta2 = 0.6
     predictCtgy = {} #存储最终预测的每个ap的类别
-    for m,v1 in distribution1.items():
-        v2 = distribution2[m]
-        v = [0]*ctgyNum
-        for i in range(len(v)):
-            v[i] = theta1*v1[i] + theta2*v2[i]
-        c = v.index(max(v)) + 1 #所属的类别＝ 概率最大的那个值的下标
-        predictCtgy[m] = c
-
-#    for m,v in distribution2.items():
+#    for m,v1 in distribution1.items():
+#        v2 = distribution2[m]
+#        v = [0]*ctgyNum
+#        for i in range(len(v)):
+#            v[i] = theta1*v1[i] + theta2*v2[i]
 #        c = v.index(max(v)) + 1 #所属的类别＝ 概率最大的那个值的下标
 #        predictCtgy[m] = c
+
+    for m,v in distribution_new.items():
+        c = v.index(max(v)) + 1 #所属的类别＝ 概率最大的那个值的下标
+        predictCtgy[m] = c
 #    for m,c in predictCtgy.items():
 #        print m, c, macCtgyTest[m], macCtgyTrue[m]
 
-    fw1 = open(s1+'_0321_predictCtgy','w') # buptpoi23_predictCtgy or szPoi_0316_predictCtgy
+    fw1 = open(s1+'_predictCtgy','w') # buptpoi23_predictCtgy or szPoiba_0316_predictCtgy
     for m,c in predictCtgy.items():
-        fw1.write(m +',' +str(c)+','+str(macCtgyTest[m])+','+str(macCtgyTrue[m]) +'\n') #输出格式： mac, 预测的类别，用于预测的mac类别值，真实的mac类别值
+        fw1.write(m +',' +str(c)+','+str(macCtgyTest[m])+','+str(macCtgyTrue[m])+','+str(numOfApNeighbor[m])+','+str(numOfApNeighborKnown[m]) +'\n') #输出格式： mac, 预测的类别，用于预测的mac类别值，真实的mac类别值
     fw1.close()
