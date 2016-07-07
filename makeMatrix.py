@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 import sys
 cmdArgv = sys.argv
-
+import time
 #from numpy import *
 
 minDistance = 0.044 #ap间的距离在这个范围内(经纬度都相差0.001)时，列为邻居
@@ -104,11 +104,23 @@ def getDistribution(macCtgyDistribution):
     return distribution
 
 
+#可以调整权重，获得不同的预测值
+def getFinalPredictCtgy(theta1, theta2):
+    predictCtgy = {} #存储最终预测的每个ap的类别
+    for m,v1 in distribution1.items():
+        v2 = distribution2[m]
+        v = [0]*ctgyNum
+        for i in range(len(v)):
+            v[i] = theta1*v1[i] + theta2*v2[i]
+        c = v.index(max(v)) + 1 #所属的类别＝ 概率最大的那个值的下标
+        predictCtgy[m] = c
+    return predictCtgy
 
 
 
 if __name__=="__main__":
 
+    t1 = time.time()
     # cmdArgv[1] = szPoiba_0316
     s1 = cmdArgv[1]
     fr1 = open(s1+'_intCatagory_block_trainset','r')#buptpoi16_22_intCatagory_block_trainset
@@ -157,7 +169,7 @@ if __name__=="__main__":
         numOfApNeighborKnown[m] = v[2]
         macCtgyDistribution1_new[m] = v[0]
 
-    distribution1 = getDistribution(macCtgyDistribution1)
+    distribution1 = getDistribution(macCtgyDistribution1_new)
 
 
     fr = open(s1+'_Utilization','r') # szPoiba_0316_Utilization
@@ -175,16 +187,28 @@ if __name__=="__main__":
 
     distribution2 = getDistribution(macUtilization)
 
-    theta1 = 0.4
-    theta2 = 0.6
-    predictCtgy = {} #存储最终预测的每个ap的类别
-    for m,v1 in distribution1.items():
-        v2 = distribution2[m]
-        v = [0]*ctgyNum
-        for i in range(len(v)):
-            v[i] = theta1*v1[i] + theta2*v2[i]
-        c = v.index(max(v)) + 1 #所属的类别＝ 概率最大的那个值的下标
-        predictCtgy[m] = c
+#    theta1 = 0.4
+#    theta2 = 0.6
+#    predictCtgy = {} #存储最终预测的每个ap的类别
+#    for m,v1 in distribution1.items():
+#        v2 = distribution2[m]
+#        v = [0]*ctgyNum
+#        for i in range(len(v)):
+#            v[i] = theta1*v1[i] + theta2*v2[i]
+#        c = v.index(max(v)) + 1 #所属的类别＝ 概率最大的那个值的下标
+#        predictCtgy[m] = c
+
+    predictCtgy0 = getFinalPredictCtgy(0,1)
+    predictCtgy1 = getFinalPredictCtgy(0.1,0.9)
+    predictCtgy2 = getFinalPredictCtgy(0.2,0.8)
+    predictCtgy3 = getFinalPredictCtgy(0.3,0.7)
+    predictCtgy4 = getFinalPredictCtgy(0.4,0.6)
+    predictCtgy5 = getFinalPredictCtgy(0.5,0.5)
+    predictCtgy6 = getFinalPredictCtgy(0.6,0.4)
+    predictCtgy7 = getFinalPredictCtgy(0.7,0.3)
+    predictCtgy8 = getFinalPredictCtgy(0.8,0.2)
+    predictCtgy9 = getFinalPredictCtgy(0.9,0.1)
+    predictCtgy10 = getFinalPredictCtgy(1,0)
 
 #    for m,v in distribution_new.items():
 #        c = v.index(max(v)) + 1 #所属的类别＝ 概率最大的那个值的下标
@@ -193,6 +217,12 @@ if __name__=="__main__":
 #        print m, c, macCtgyTest[m], macCtgyTrue[m]
 
     fw1 = open(s1+'_predictCtgy','w') # buptpoi23_predictCtgy or szPoiba_0316_predictCtgy
-    for m,c in predictCtgy.items():
-        fw1.write(m +',' +str(c)+','+str(macCtgyTest[m])+','+str(macCtgyTrue[m])+','+str(numOfApNeighbor[m])+','+str(numOfApNeighborKnown[m]) +'\n') #输出格式： mac, 预测的类别，用于预测的mac类别值，真实的mac类别值
+    for m,c in predictCtgy0.items():
+        fw1.write(m +',' +str(c)+','+str(predictCtgy1[m])+','+str(predictCtgy2[m])+','+str(predictCtgy3[m]) \
+        +','+str(predictCtgy4[m])+','+str(predictCtgy5[m])+','+str(predictCtgy6[m])+','+str(predictCtgy7[m]) \
+        +','+str(predictCtgy8[m])+','+str(predictCtgy9[m])+','+str(predictCtgy10[m])+','+str(macCtgyTest[m]) \
+        +','+str(macCtgyTrue[m])+','+str(numOfApNeighbor[m])+','+str(numOfApNeighborKnown[m]) +'\n') #输出格式： mac, 预测的类别，用于预测的mac类别值，真实的mac类别值
     fw1.close()
+
+    t2 = time.time()
+    print time.localtime(t2-t1)

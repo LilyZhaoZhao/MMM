@@ -47,7 +47,7 @@ for line in datas:
     #    print >> output, line.strip('\n')
 
 
-samplingRatio = 0.3 #采样比例，即留出30%作为测试集
+samplingRatio = 0.5 #采样比例，即留出30%作为测试集
 
 for item in res:
     numOfApInItem = len(res[item])
