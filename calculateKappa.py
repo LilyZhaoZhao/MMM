@@ -61,8 +61,8 @@ def calKappa(p,r,classN = 16):
 
 
 def outputFunc(day):
-    s = "szPoiba_03"+str(day)+"_predictCtgy2"
-    fr = open(s,'r') #szPoiba_0321_predictCtgy2
+    ss = s+"_03"+str(day)+"_predictCtgy"
+    fr = open(ss,'r') #szPoiba_0321_predictCtgy2
     p0 = [] #存储每个权重对的预测值
     p1 = []
     p2 = []
@@ -77,7 +77,7 @@ def outputFunc(day):
     r = []
     for l in fr.readlines():
         l = l.strip('\n')
-        l = l.split(' ')
+        l = l.split(',')
         if(int(l[12])==0): #对未知类型ap的预测结果的kappa值
 #        if(len(l)==16):   #所有ap的预测结果的kappa值
             p0.append(int(l[1]))
@@ -112,8 +112,9 @@ def outputFunc(day):
 
 
 if __name__=="__main__":
-    fw1 = open("szPoiba_numOfRightAndRealEachCtgy16_22",'w') #每一天，每种权值，一行为 每类的正确个数，每类的实际个数
-    fw2 = open("szPoiba_accuracyAndKappa16_22",'w')#每一天，每种权值，一行为 对未知ap的预测准确率，kappa
+    s = cmdArgv[1] #szPoiba
+    fw1 = open(s+"_numOfRightAndRealEachCtgy16_22",'w') #每一天，每种权值，一行为 每类的正确个数，每类的实际个数
+    fw2 = open(s+"_accuracyAndKappa16_22",'w')#每一天，每种权值，一行为 对未知ap的预测准确率，kappa
     for day in range(16,23):
         outputFunc(day)
     fw1.close()

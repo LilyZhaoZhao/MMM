@@ -42,8 +42,8 @@ if __name__=="__main__":
 
     fw = open(s+"_apDensity16_22",'w')
     for i in range(size):
-        if allApList[i] == 0:
-            fw.write(str(i*20)+',1\n')  #按20为间隔，划分邻域ap个数的区间，则准确率就是：在这个区间内，预测正确的ap个数占比
+        if allApList[i] == 0:     #注意，如果该区间内没有ap，则令准确率为整数0
+            fw.write(str(i*20)+',0\n')  #按20为间隔，划分邻域ap个数的区间，则准确率就是：在这个区间内，预测正确的ap个数占比
         else:
             fw.write(str(i*20)+','+str(float(rightApList[i])/allApList[i])+'\n')
 
